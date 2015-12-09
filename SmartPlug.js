@@ -5,37 +5,42 @@ var SmartPlug = function(ipAddress) {
   this._ipAddress = ipAddress;
 };
 
-SmartPlug._call = function (method) {
+SmartPlug.prototype._call = function (method) {
   var ipAddress = this._ipAddress;
   return new Promise(function (resolve, reject) {
-    http.get({
-      hostname: ipAddress,
-      port: 80,
-      path: '/cgi-bin/relay.cgi?' + method,
-      agent: false
-    }, function (res) {
-      if (res.statusCode === 200) {
-        resolve(true);
-      } else {
-        reject(new Error(method + " to " + ipAddress + " failed with status code " + res.statusCode));
-      }
+    var options = {
+        host: ipAddress,
+        path: '/cgi-bin/relay.cgi?' + method
+    }
+    var request = http.request(options, function (res) {
+        var data = '';
+        res.on('data', function (chunk) {
+            data += chunk;
+        });
+        res.on('end', function () {
+            resolve(data);
+        });
     });
+    request.on('error', function (e) {
+        reject(e);
+    });
+    request.end();
   });
 };
 
-SmartPlug.getState = function () {
+SmartPlug.prototype.getState = function () {
   return this._call('state');
 };
 
-SmartPlug.on = function () {
+SmartPlug.prototype.on = function () {
   return this._call('on');
 };
 
-SmartPlug.off = function () {
+SmartPlug.prototype.off = function () {
   return this._call('off');
 };
 
-SmartPlug.toggle = function () {
+SmartPlug.prototype.toggle = function () {
   return this._call('toggle');
 };
 
