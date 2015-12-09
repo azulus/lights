@@ -1,5 +1,5 @@
 var promise = require('es6-promise');
-var SmartPlug = require('../SmartPlug');
+var SmartPlug = require('../MockSmartPlug');
 
 var plug = SmartPlug.getSmartPlug('192.168.42.22');
 
