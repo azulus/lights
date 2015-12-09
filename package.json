@@ -1,0 +1,8 @@
+{
+  "name": "lights",
+  "private": true,
+  "dependencies": {
+    "es6-promise": "^3.0.2"
+  },
+  "deveDependencies": {}
+}
