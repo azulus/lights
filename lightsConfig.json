@@ -1,0 +1,16 @@
+{
+  "plugs": [
+    {
+      "ipAddress": "192.168.42.20",
+      "name": "icicles"
+    },
+    {
+      "ipAddress": "192.168.42.21",
+      "name": "bushes-left"
+    },
+    {
+      "ipAddress": "192.168.42.22",
+      "name": "bushes-right"
+    }
+  ]
+}
