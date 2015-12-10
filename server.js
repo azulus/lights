@@ -6,26 +6,33 @@ process.on('uncaughtException', function (err) {
 });
 
 var Promise = require('es6-promise').Promise;
-var SmartPlug = require('./SmartPlug');
+var SmartPlug = require('./MockSmartPlug');
+var SmartPlugManager = require('./SmartPlugManager');
 
 var config = JSON.parse(fs.readFileSync('./lightsConfig.json'));
+var manager = new SmartPlugManager();
 
-var plugs = {};
+if (config.toggleUrl) {
+  var cycler = require('./cycler');
+  cycler.on('change', function () {
+    console.log('CYCLING LIGHTS');
+    manager.cycle();
+  });
+  cycler.start(config.toggleUrl, config.toggleCheckUrl || 15000);
+}
+
 config.plugs.forEach(function (plugConfig) {
   var ipAddress = plugConfig.ipAddress;
   var name = plugConfig.name;
-  plugs[name] = {
-    ref: SmartPlug.getSmartPlug(ipAddress),
-    config: plugConfig
-  };
+  manager.add(name, SmartPlug.getSmartPlug(ipAddress));
 });
 
 var app = express();
 app.get('/', function (req, res) {
   // get the state of all plugs
-  var keys = Object.keys(plugs);
+  var keys = manager.keys();
   Promise.all(keys.map(function (key) {
-    return plugs[key].ref.getState();
+    return manager.get(key).getState();
   })).then(function (states) {
     res.send("<html>" +
       "<head><style type='text/css'>" +
@@ -43,8 +50,8 @@ app.get('/', function (req, res) {
 
 app.get('/off', function (req, res) {
   // turn all off
-  Promise.all(Object.keys(plugs).map(function (name) {
-    return plugs[name].ref.off();
+  Promise.all(manager.map(function (plug) {
+    return plug.off();
   })).then(function () {
     res.redirect('/');
   });
@@ -52,8 +59,8 @@ app.get('/off', function (req, res) {
 
 app.get('/on', function (req, res) {
   // turn all off
-  Promise.all(Object.keys(plugs).map(function (name) {
-    return plugs[name].ref.on();
+  Promise.all(manager.map(function (plug) {
+    return plug.on();
   })).then(function () {
     res.redirect('/');
   });
@@ -64,11 +71,11 @@ app.get('/:action/:name', function (req, res) {
     case "on":
     case "off":
     case "toggle":
-      var plug = plugs[req.params.name];
+      var plug = manager.get(req.params.name);
       if (!plug) {
         res.send('Unknown plug');
       } else {
-        plug.ref[req.params.action]().then(function () {
+        plug[req.params.action]().then(function () {
           res.redirect('/');
         }, function (err) {
           res.send(err.message);

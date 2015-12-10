@@ -12,5 +12,7 @@
       "ipAddress": "192.168.42.22",
       "name": "bushes-right"
     }
-  ]
+  ],
+  "toggleUrl": "https://4d2cxkhegi.execute-api.us-east-1.amazonaws.com/prod/getLights",
+  "toggleCheckInterval": 15000
 }
