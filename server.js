@@ -6,7 +6,7 @@ process.on('uncaughtException', function (err) {
 });
 
 var Promise = require('es6-promise').Promise;
-var SmartPlug = require('./MockSmartPlug');
+var SmartPlug = require('./SmartPlug');
 var SmartPlugManager = require('./SmartPlugManager');
 
 var config = JSON.parse(fs.readFileSync('./lightsConfig.json'));
